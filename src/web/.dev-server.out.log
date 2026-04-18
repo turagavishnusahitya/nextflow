@@ -28,13 +28,14 @@
  ✓ Compiled in 712ms (334 modules)
  ✓ Compiled in 2.1s (555 modules)
  ✓ Compiled in 988ms (334 modules)
-5s (335 modules)
- ○ Compiling /_not-found ...
- ✓ Compiled /_not-found in 2.6s (945 modules)
- GET / 404 in 3950ms
- GET / 200 in 1400ms
- GET / 307 in 1451ms
- ○ Compiling /workflows/[id] ...
+   ▲ Next.js 15.5.15
+   - Local:        http://localhost:3003
+   - Network:      http://192.168.55.104:3003
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 10.5s
+/[id] ...
  ✓ Compiled /workflows/[id] in 4.2s (1298 modules)
  GET /workflows/new 200 in 5222ms
  GET / 200 in 5324ms
@@ -95,10 +96,14 @@ Please make sure to provide valid database credentials for th ✓ Compiled in 48
  ✓ Compiled in 884ms (513 modules)
  ✓ Compiled in 2.3s (734 modules)
  ✓ Compiled in 1121ms (513 modules)
- provided database credentials for `(not available)` are not valid.
+   ▲ Next.js 15.5.15
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.55.104:3000
+   - Environments: .env.local, .env
 
-Please make sure to provide valid database credentials for the database server at the configured address.
- GET /workflows/new 200 in 2857ms
+ ✓ Starting...
+ ✓ Ready in 10.5s
+kflows/new 200 in 2857ms
  ○ Compiling /workflows/sample ...
  ✓ Compiled /workflows/sample in 1579ms (1299 modules)
  GET /workflows/sample 200 in 2067ms
@@ -162,3 +167,17 @@ Please make sure to provide valid database credentials for the database server a
  GET /workflows/blank 200 in 564ms
  GET /api/executions?workflowId=blank 200 in 81ms
  POST /workflows/blank 200 in 100ms
+ GET /workflows/blank 200 in 366ms
+ GET /api/executions?workflowId=blank 200 in 93ms
+ POST /workflows/blank 200 in 82ms
+   ▲ Next.js 15.5.15
+   - Local:        http://localhost:3004
+   - Network:      http://192.168.55.104:3004
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 10.4s
+ ○ Compiling /middleware ...
+ ✓ Compiled /middleware in 1055ms (221 modules)
+ ○ Compiling /workflows/blank ...
+ ✓ Compiled /workflows/blank in 15.3s (1313 modules)

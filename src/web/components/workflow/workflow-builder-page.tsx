@@ -15,10 +15,12 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock3,
+  Download,
   Loader2,
   Play,
   Plus,
   RefreshCw,
+  Upload,
   WandSparkles,
   XCircle,
 } from "lucide-react";
@@ -60,6 +62,13 @@ type NodeLibraryItem = {
   type: string;
   label: string;
   description: string;
+};
+
+type WorkflowJsonPayload = {
+  name?: unknown;
+  description?: unknown;
+  nodes?: unknown;
+  edges?: unknown;
 };
 
 const NODE_LIBRARY: NodeLibraryItem[] = [
@@ -178,6 +187,13 @@ function outputFieldAsString(
   return typeof value === "string" ? value : "";
 }
 
+function sanitizeFileName(value: string): string {
+  const trimmed = value.trim().toLowerCase();
+  const safe = trimmed.replace(/[^a-z0-9-_]+/g, "-").replace(/-+/g, "-");
+  const normalized = safe.replace(/^-|-$/g, "");
+  return normalized || "workflow";
+}
+
 function isWorkflowCycle(nodes: Node[], edges: Edge[]): boolean {
   const indegree = new Map<string, number>();
   const adjacency = new Map<string, string[]>();
@@ -281,6 +297,7 @@ export function WorkflowBuilderPage({ workflow }: { workflow: PersistedWorkflow 
   const canvasRef = useRef<HTMLDivElement>(null);
   const lastPointerRef = useRef<{ x: number; y: number } | null>(null);
   const hydratedWorkflowIdRef = useRef<string | null>(null);
+  const importFileRef = useRef<HTMLInputElement>(null);
 
   const selectedNodeIds = useMemo(
     () => nodes.filter((node) => node.selected).map((node) => node.id),
@@ -620,6 +637,107 @@ export function WorkflowBuilderPage({ workflow }: { workflow: PersistedWorkflow 
     [nodeStatuses],
   );
 
+  const exportWorkflowJson = useCallback(() => {
+    try {
+      const payload = {
+        name: workflowName || workflow.name || "Workflow",
+        description: workflow.description ?? null,
+        nodes: nodes.map((node) => ({
+          id: node.id,
+          type: node.type,
+          position: node.position,
+          data: node.data ?? {},
+          selected: Boolean(node.selected),
+        })),
+        edges: edges.map((edge) => ({
+          id: edge.id,
+          source: edge.source,
+          target: edge.target,
+          sourceHandle: edge.sourceHandle ?? null,
+          targetHandle: edge.targetHandle ?? null,
+          animated: Boolean(edge.animated),
+        })),
+        exportedAt: new Date().toISOString(),
+        formatVersion: 1,
+      };
+
+      const json = JSON.stringify(payload, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `${sanitizeFileName(String(payload.name))}.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setExecutionError("Failed to export workflow JSON.");
+    }
+  }, [edges, nodes, setExecutionError, workflow.description, workflow.name, workflowName]);
+
+  const importWorkflowJson = useCallback(
+    async (file: File) => {
+      try {
+        const rawText = await file.text();
+        const parsed = JSON.parse(rawText) as WorkflowJsonPayload;
+        if (!Array.isArray(parsed.nodes) || !Array.isArray(parsed.edges)) {
+          throw new Error("Missing nodes/edges arrays.");
+        }
+
+        const normalizedNodes = (parsed.nodes as Node[]).map((node) => ({
+          ...node,
+          id: String(node.id),
+          type: String(node.type),
+          position: {
+            x: Number(node.position?.x ?? 0),
+            y: Number(node.position?.y ?? 0),
+          },
+          data:
+            typeof node.data === "object" && node.data !== null
+              ? (node.data as Record<string, unknown>)
+              : {},
+          selected: Boolean(node.selected),
+        }));
+
+        const normalizedEdges = (parsed.edges as Edge[]).map((edge) => ({
+          ...edge,
+          id: String(edge.id),
+          source: String(edge.source),
+          target: String(edge.target),
+          sourceHandle:
+            edge.sourceHandle === null || edge.sourceHandle === undefined
+              ? undefined
+              : String(edge.sourceHandle),
+          targetHandle:
+            edge.targetHandle === null || edge.targetHandle === undefined
+              ? undefined
+              : String(edge.targetHandle),
+          animated: true,
+          style: { stroke: "#9aa3b2", strokeWidth: 1.7 },
+        }));
+
+        const nextName =
+          typeof parsed.name === "string" && parsed.name.trim().length > 0
+            ? parsed.name.trim()
+            : workflowName || workflow.name || "Imported Workflow";
+
+        setWorkflow({
+          workflowId: workflowId ?? workflow.id,
+          workflowName: nextName,
+          nodes: normalizedNodes,
+          edges: normalizedEdges,
+        });
+        setExecutionError(null);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Invalid workflow JSON file.";
+        setExecutionError(`Import failed: ${message}`);
+      }
+    },
+    [setExecutionError, setWorkflow, workflow.id, workflow.name, workflowId, workflowName],
+  );
+
   return (
     <div
       style={{
@@ -686,6 +804,37 @@ export function WorkflowBuilderPage({ workflow }: { workflow: PersistedWorkflow 
           <p className="text-[11px] text-zinc-500">
             Selected nodes: <span className="text-zinc-300 font-medium">{selectedNodeIds.length}</span>
           </p>
+
+          <div className="pt-1 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={exportWorkflowJson}
+              className="h-9 rounded-md border border-[#2f3945] bg-[#16202b] text-zinc-200 hover:bg-[#1e2b3a] inline-flex items-center justify-center gap-1.5 text-xs font-medium"
+            >
+              <Download size={12} />
+              Export JSON
+            </button>
+            <button
+              type="button"
+              onClick={() => importFileRef.current?.click()}
+              className="h-9 rounded-md border border-[#2f3945] bg-[#16202b] text-zinc-200 hover:bg-[#1e2b3a] inline-flex items-center justify-center gap-1.5 text-xs font-medium"
+            >
+              <Upload size={12} />
+              Import JSON
+            </button>
+            <input
+              ref={importFileRef}
+              type="file"
+              accept="application/json,.json"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                void importWorkflowJson(file);
+                event.target.value = "";
+              }}
+            />
+          </div>
         </div>
       </aside>
 
