@@ -181,3 +181,9 @@ kflows/new 200 in 2857ms
  ✓ Compiled /middleware in 1055ms (221 modules)
  ○ Compiling /workflows/blank ...
  ✓ Compiled /workflows/blank in 15.3s (1313 modules)
+ GET /workflows/blank 200 in 17646ms
+ ○ Compiling /api/executions ...
+ ✓ Compiled /api/executions in 2.5s (1309 modules)
+ GET /api/executions?workflowId=blank 200 in 2943ms
+ POST /workflows/blank 200 in 3261ms
+ GET /workflows/blank 200 in 224ms

@@ -171,7 +171,9 @@ export async function runGeminiOnServer(payload: RunGeminiPayload) {
     10,
   );
   const allowMockOnQuota =
-    (process.env.GEMINI_ALLOW_MOCK_ON_QUOTA ?? "false").toLowerCase() ===
+    (process.env.GEMINI_ALLOW_MOCK_ON_QUOTA ?? "false")
+      .trim()
+      .toLowerCase() ===
     "true";
 
   let lastError: Error | null = null;

@@ -2,13 +2,21 @@ import crypto from "node:crypto";
 
 export type TransloaditSignatureAlgorithm = "sha1" | "sha384";
 
+function normalizeEnvValue(value: string | undefined) {
+  if (!value) return "";
+  return value.trim().replace(/^"(.*)"$/, "$1");
+}
+
 export function signTransloaditParams(
   params: Record<string, unknown>,
   signatureAlgorithm?: TransloaditSignatureAlgorithm,
 ) {
-  const secret =
-    process.env.TRANSLOADIT_AUTH_SECRET ?? process.env.TRANSLOADIT_SECRET;
-  const key = process.env.TRANSLOADIT_AUTH_KEY ?? process.env.TRANSLOADIT_KEY;
+  const secret = normalizeEnvValue(
+    process.env.TRANSLOADIT_AUTH_SECRET ?? process.env.TRANSLOADIT_SECRET,
+  );
+  const key = normalizeEnvValue(
+    process.env.TRANSLOADIT_AUTH_KEY ?? process.env.TRANSLOADIT_KEY,
+  );
   if (!secret || !key) {
     throw new Error(
       "Missing Transloadit credentials. Set TRANSLOADIT_AUTH_KEY/TRANSLOADIT_AUTH_SECRET (or TRANSLOADIT_KEY/TRANSLOADIT_SECRET).",
