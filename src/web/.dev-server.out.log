@@ -143,3 +143,22 @@ Please make sure to provide valid database credentials for the database server a
  ✓ Compiled /api/executions in 870ms (808 modules)
  GET /api/executions?workflowId=blank 200 in 1285ms
  GET /api/executions?workflowId=blank 200 in 1351ms
+ GET /workflows/blank 200 in 1384ms
+ GET /api/executions?workflowId=blank 200 in 67ms
+ POST /workflows/blank 200 in 89ms
+ GET /workflows/blank 200 in 303ms
+ GET /api/executions?workflowId=blank 200 in 53ms
+ POST /workflows/blank 200 in 50ms
+ GET /workflows/blank 200 in 376ms
+ GET /api/executions?workflowId=blank 200 in 50ms
+ POST /workflows/blank 200 in 58ms
+ GET / 200 in 257ms
+ POST / 200 in 49ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1938ms (1327 modules)
+ GET /SignIn_clerk_catchall_check_1776534641365 404 in 3347ms
+ GET / 200 in 304ms
+ GET /workflows/blank 200 in 314ms
+ GET /workflows/blank 200 in 564ms
+ GET /api/executions?workflowId=blank 200 in 81ms
+ POST /workflows/blank 200 in 100ms
